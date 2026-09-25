@@ -6,7 +6,8 @@ set -euo pipefail
 # Runs as root on an arm64 Linux host. The image holds the official rootfs,
 # systemd-boot, and cloud-init. Lima's cloud-init data creates the user,
 # the SSH keys, and the mounts at first boot, and cloud-init grows the root
-# partition to the disk size Lima picks.
+# partition to the disk size Lima picks. fish ships in the image so a Lima
+# template can make it the user's shell from the first boot.
 
 DISK_SIZE="${DISK_SIZE:-4}"
 TARBALL="${TARBALL:-http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz}"
@@ -82,7 +83,7 @@ pacman-key --init
 pacman-key --populate archlinuxarm
 pacman -Syu --noconfirm
 pacman -S --needed --noconfirm \
-  openssh sudo mkinitcpio cloud-init cloud-guest-utils
+  openssh sudo mkinitcpio cloud-init cloud-guest-utils fish
 
 bootctl install --esp-path=/boot --no-variables
 sed -i 's/^MODULES=.*/MODULES=(virtio_pci virtio_net virtio_blk virtio_mmio virtio_ring)/' \

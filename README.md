@@ -11,6 +11,7 @@ ARM rootfs and publishes it as a release.
 - EFI boot through systemd-boot, networking through systemd-networkd
 - cloud-init, which applies Lima's user, SSH keys, and mounts on first boot
 - `growpart`, so the root partition fills the disk size Lima sets
+- fish, for use as `user.shell`
 
 The image has no user and a locked root account.
 
