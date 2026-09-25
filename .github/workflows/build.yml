@@ -1,0 +1,43 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: shellcheck build.sh
+
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y gdisk dosfstools e2fsprogs libarchive-tools qemu-utils
+
+      - run: sudo ./build.sh
+
+      - run: sha512sum archlinux-aarch64.qcow2 | sudo tee archlinux-aarch64.qcow2.sha512sum
+        working-directory: .build
+
+      # Pushes to main and the weekly run publish a release. Pull requests
+      # only prove the image builds.
+      - if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="v$(date -u +%Y%m%d)-${GITHUB_RUN_NUMBER}"
+          gh release create "$tag" --latest --title "$tag" \
+            --notes "Arch Linux ARM for Lima, built from ${GITHUB_SHA}." \
+            .build/archlinux-aarch64.qcow2 .build/archlinux-aarch64.qcow2.sha512sum
