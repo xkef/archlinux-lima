@@ -62,6 +62,12 @@ mkdir -p "$MNT/etc/systemd/timesyncd.conf.d"
 printf '[Time]\nPollIntervalMinSec=16\nPollIntervalMaxSec=32\n' \
   >"$MNT/etc/systemd/timesyncd.conf.d/10-vm-poll.conf"
 
+# LLMNR and multicast DNS have no use in a VM, and Lima would forward their
+# ports to the host.
+mkdir -p "$MNT/etc/systemd/resolved.conf.d"
+printf '[Resolve]\nLLMNR=no\nMulticastDNS=no\n' \
+  >"$MNT/etc/systemd/resolved.conf.d/10-vm.conf"
+
 mount --bind /dev "$MNT/dev"
 mount --bind /proc "$MNT/proc"
 mount --bind /sys "$MNT/sys"
